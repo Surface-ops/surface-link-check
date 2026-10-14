@@ -1,0 +1,41 @@
+name: "Surface Link Check"
+description: "Check every link in your Markdown files with Surface URL preflight. Flags dead, blocked, and redirect-chain links before agents or readers hit them."
+author: "Surface-ops"
+branding:
+  icon: "link"
+  color: "blue"
+inputs:
+  files:
+    description: "Glob(s) of files to scan, space-separated"
+    default: "**/*.md"
+  api-key:
+    description: "Optional Surface API key (first 1M checks/month are free)"
+    default: ""
+  endpoint:
+    description: "Surface API base URL"
+    default: "https://nova-otter-delta-cloud.grok.me"
+  fail-on:
+    description: "Comma-separated verdicts that fail the job (e.g. skip,dead)"
+    default: "skip,dead,blocked"
+  max-links:
+    description: "Maximum unique links to check"
+    default: "200"
+outputs:
+  checked:
+    description: "Number of links checked"
+    value: ${{ steps.run.outputs.checked }}
+  failed:
+    description: "Number of links that matched fail-on"
+    value: ${{ steps.run.outputs.failed }}
+runs:
+  using: "composite"
+  steps:
+    - id: run
+      shell: bash
+      env:
+        SURFACE_FILES: ${{ inputs.files }}
+        SURFACE_KEY: ${{ inputs.api-key }}
+        SURFACE_ENDPOINT: ${{ inputs.endpoint }}
+        SURFACE_FAIL_ON: ${{ inputs.fail-on }}
+        SURFACE_MAX: ${{ inputs.max-links }}
+      run: bash "${{ github.action_path }}/check.sh"
