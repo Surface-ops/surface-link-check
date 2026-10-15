@@ -8,8 +8,11 @@ inputs:
   files:
     description: "Glob(s) of files to scan, space-separated"
     default: "**/*.md"
+  surface-key:
+    description: "Optional free Surface API key (surf_...). Get one with POST /v1/keys or at /start#key. Pass it from a secret, e.g. secrets.SURFACE_KEY."
+    default: ""
   api-key:
-    description: "Optional Surface API key (first 1M checks/month are free)"
+    description: "Deprecated alias for surface-key"
     default: ""
   endpoint:
     description: "Surface API base URL"
@@ -34,7 +37,7 @@ runs:
       shell: bash
       env:
         SURFACE_FILES: ${{ inputs.files }}
-        SURFACE_KEY: ${{ inputs.api-key }}
+        SURFACE_KEY: ${{ inputs.surface-key || inputs.api-key }}
         SURFACE_ENDPOINT: ${{ inputs.endpoint }}
         SURFACE_FAIL_ON: ${{ inputs.fail-on }}
         SURFACE_MAX: ${{ inputs.max-links }}
