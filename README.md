@@ -2,7 +2,7 @@
 
 A GitHub Action that checks every link in your Markdown on each push and PR, using [Surface](https://nova-otter-delta-cloud.grok.me) URL preflight. Surface follows redirects and shorteners, then gives each link a verdict: fetch, skip, dead, or blocked. That way broken docs links get caught before readers or AI agents run into them.
 
-- No setup: works without a key, and the first 1M checks each month are free.
+- No setup: works without a key (60 checks per minute). Add a free key for your own usage page and no rate cap. The first 1M checks each month are free.
 - Writes a table to the job summary and adds a warning annotation for each failing link.
 - No dependencies beyond `bash`, `curl` and `jq`, which every GitHub runner already has.
 
@@ -26,6 +26,21 @@ jobs:
           files: "**/*.md"
 ```
 
+### With a free API key (optional)
+
+1. Get a key (no card): `curl -s -X POST https://nova-otter-delta-cloud.grok.me/v1/keys`, or use https://nova-otter-delta-cloud.grok.me/start#key.
+2. Save it as a repository secret named `SURFACE_KEY` (Settings → Secrets and variables → Actions).
+3. Pass it to the action:
+
+```yaml
+      - uses: Surface-ops/surface-link-check@v1
+        with:
+          files: "**/*.md"
+          surface-key: ${{ secrets.SURFACE_KEY }}
+```
+
+The key is sent as `Authorization: Bearer`. If the secret is missing (for example on pull requests from forks), the check still runs without a key.
+
 ## Inputs
 
 | input | default | description |
@@ -33,7 +48,8 @@ jobs:
 | `files` | `**/*.md` | Space-separated globs to scan |
 | `fail-on` | `skip,dead,blocked` | Verdicts that fail the job |
 | `max-links` | `200` | Maximum unique links checked per run |
-| `api-key` | none | Optional Surface key, for usage above the free tier |
+| `surface-key` | none | Optional free Surface key, sent as a Bearer header. Use `${{ secrets.SURFACE_KEY }}` |
+| `api-key` | none | Deprecated alias for `surface-key` |
 | `endpoint` | Surface API | Override the API base URL |
 
 ## Outputs
